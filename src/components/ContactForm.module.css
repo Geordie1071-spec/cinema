@@ -94,41 +94,6 @@
   flex-shrink: 0;
 }
 
-.captcha {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 4px;
-  padding: 12px 14px;
-  background: rgba(243, 241, 236, 0.06);
-  border: 1px solid rgba(243, 241, 236, 0.12);
-}
-
-.captchaCheck {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #2f9e44;
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.captchaLabel {
-  font-size: 13px;
-  font-weight: 600;
-  flex: 1;
-}
-
-.captchaMeta {
-  font-size: 11px;
-  color: rgba(243, 241, 236, 0.4);
-  letter-spacing: 0.04em;
-}
-
 .submit {
   margin-top: 8px;
   width: 100%;

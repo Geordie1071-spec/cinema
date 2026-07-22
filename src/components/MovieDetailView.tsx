@@ -6,7 +6,6 @@ import {
   getShowDates,
   posterUrl,
 } from "@/lib/movies";
-import BuyTicketsLink from "./BuyTicketsLink";
 import RatingRing from "./RatingRing";
 import styles from "./MovieDetailView.module.css";
 
@@ -83,8 +82,6 @@ export default function MovieDetailView({
                   </>
                 ) : null}
               </div>
-
-              <BuyTicketsLink href="/" className={styles.cta} />
             </div>
           </div>
         </div>

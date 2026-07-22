@@ -76,12 +76,6 @@ export default function ContactForm() {
               <span>{CONTACT.consent}</span>
             </label>
 
-            <div className={styles.captcha} aria-hidden>
-              <span className={styles.captchaCheck}>✓</span>
-              <span className={styles.captchaLabel}>Success!</span>
-              <span className={styles.captchaMeta}>Verification</span>
-            </div>
-
             <button type="submit" className={styles.submit}>
               {CONTACT.submitLabel}
             </button>
