@@ -63,9 +63,13 @@ export default function AboutSections() {
     });
   };
 
+  // Offset by +1 so the active section's bar starts filled (section 0 = 1),
+  // and the final section reaches full color instead of staying empty.
   const fills = useMemo(
     () =>
-      SECTION_DATA.map((_, i) => clamp(scrollTop / effectiveVh - i, 0, 1)),
+      SECTION_DATA.map((_, i) =>
+        clamp(scrollTop / effectiveVh - i + 1, 0, 1)
+      ),
     [scrollTop, effectiveVh]
   );
 

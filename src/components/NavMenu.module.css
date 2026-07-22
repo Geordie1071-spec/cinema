@@ -53,3 +53,24 @@
   transform: translateX(-16px);
   color: #fa315c;
 }
+
+@media (max-width: 768px) {
+  .closeButton {
+    top: 20px;
+    right: 20px;
+    font-size: 28px;
+  }
+
+  .nav {
+    padding-left: 6vw;
+    gap: 4px;
+  }
+
+  .navLink {
+    font-size: clamp(40px, 12vw, 56px);
+  }
+
+  .navLink:hover {
+    transform: translateX(-8px);
+  }
+}

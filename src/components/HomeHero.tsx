@@ -13,6 +13,26 @@ import styles from "./HomeHero.module.css";
 
 type Tab = "now" | "upcoming";
 
+const REVEAL_MS = 320;
+const TAB_SWITCH_MS = 180;
+
+function backdropUrl(path: string | null) {
+  return path ? `${TMDB_IMAGE_BASE}w1280${path}` : "";
+}
+
+function preloadImage(src: string) {
+  return new Promise<void>((resolve) => {
+    if (!src) {
+      resolve();
+      return;
+    }
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = src;
+  });
+}
+
 export default function HomeHero() {
   const [tab, setTab] = useState<Tab>("now");
   const [now, setNow] = useState<Movie[]>([]);
@@ -25,10 +45,15 @@ export default function HomeHero() {
   const [baseBg, setBaseBg] = useState("");
   const [incomingBg, setIncomingBg] = useState<string | null>(null);
   const [revealing, setRevealing] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [switching, setSwitching] = useState(false);
 
   const revealTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tabTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeIdRef = useRef<number | null>(null);
+  const incomingBgRef = useRef<string | null>(null);
+  const genRef = useRef(0);
+  const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const list = tab === "now" ? now : upcoming;
 
@@ -36,29 +61,61 @@ export default function HomeHero() {
     if (!movie) return;
     if (!instant && activeIdRef.current === movie.id) return;
     activeIdRef.current = movie.id;
-    const backdrop = `${TMDB_IMAGE_BASE}original${movie.backdrop_path}`;
+    const gen = ++genRef.current;
+    const backdrop = backdropUrl(movie.backdrop_path);
+
     setActiveMovie(movie);
     setRuntime(null);
     setLogoUrl(null);
 
     if (revealTimeout.current) clearTimeout(revealTimeout.current);
 
-    if (instant) {
+    const finishCrossfade = () => {
+      if (gen !== genRef.current) return;
       setBaseBg(backdrop);
+      incomingBgRef.current = null;
       setIncomingBg(null);
       setRevealing(false);
-    } else {
-      setIncomingBg(backdrop);
-      setRevealing(false);
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => setRevealing(true))
-      );
-      revealTimeout.current = setTimeout(() => {
+      setResetting(false);
+    };
+
+    const startCrossfade = async () => {
+      if (gen !== genRef.current) return;
+
+      if (instant || !backdrop) {
+        incomingBgRef.current = null;
         setBaseBg(backdrop);
         setIncomingBg(null);
         setRevealing(false);
-      }, 880);
-    }
+        setResetting(false);
+        return;
+      }
+
+      await preloadImage(backdrop);
+      if (gen !== genRef.current) return;
+
+      // Commit any in-flight backdrop so rapid shifts never stack fades.
+      if (incomingBgRef.current) {
+        setBaseBg(incomingBgRef.current);
+      }
+
+      incomingBgRef.current = backdrop;
+      setResetting(true);
+      setRevealing(false);
+      setIncomingBg(backdrop);
+
+      requestAnimationFrame(() => {
+        if (gen !== genRef.current) return;
+        setResetting(false);
+        requestAnimationFrame(() => {
+          if (gen !== genRef.current) return;
+          setRevealing(true);
+          revealTimeout.current = setTimeout(finishCrossfade, REVEAL_MS);
+        });
+      });
+    };
+
+    void startCrossfade();
 
     Promise.all([fetchMovieDetail(movie.id), fetchMovieImages(movie.id)])
       .then(([detail, images]) => {
@@ -66,7 +123,7 @@ export default function HomeHero() {
         const logos = (images.logos || []).filter((l) => l.file_path);
         const en = logos.find((l) => l.iso_639_1 === "en") || logos[0];
         setRuntime(detail.runtime ?? null);
-        setLogoUrl(en ? `${TMDB_IMAGE_BASE}original${en.file_path}` : null);
+        setLogoUrl(en ? `${TMDB_IMAGE_BASE}w500${en.file_path}` : null);
       })
       .catch(() => {});
   }, []);
@@ -92,8 +149,18 @@ export default function HomeHero() {
     return () => {
       cancelled = true;
       if (revealTimeout.current) clearTimeout(revealTimeout.current);
+      if (tabTimeout.current) clearTimeout(tabTimeout.current);
     };
   }, [setActive]);
+
+  useEffect(() => {
+    const card = cardRefs.current[index];
+    card?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }, [index, tab]);
 
   const goTo = (i: number) => {
     const n = list.length;
@@ -106,13 +173,14 @@ export default function HomeHero() {
   const selectTab = (nextTab: Tab) => {
     if (nextTab === tab || switching) return;
     setSwitching(true);
-    setTimeout(() => {
+    if (tabTimeout.current) clearTimeout(tabTimeout.current);
+    tabTimeout.current = setTimeout(() => {
       const nextList = nextTab === "now" ? now : upcoming;
       setTab(nextTab);
       setIndex(0);
       setSwitching(false);
       if (nextList[0]) setActive(nextList[0], true);
-    }, 340);
+    }, TAB_SWITCH_MS);
   };
 
   const genres = active
@@ -138,11 +206,12 @@ export default function HomeHero() {
       />
       <div
         className={`${styles.bgLayer} ${styles.bgIncoming} ${
-          revealing ? styles.bgIncomingRevealing : ""
-        }`}
+          resetting ? styles.bgIncomingReset : ""
+        } ${revealing ? styles.bgIncomingRevealing : ""}`}
         style={
-          incomingBg ? { backgroundImage: `url(${incomingBg})` } : { opacity: 0 }
+          incomingBg ? { backgroundImage: `url(${incomingBg})` } : undefined
         }
+        aria-hidden
       />
       <div className={styles.gradientH} />
       <div className={styles.gradientV} />
@@ -171,9 +240,12 @@ export default function HomeHero() {
           <span>{year}</span>
           <span className={styles.metaDot}>&middot;</span>
           <span>{runtimeLabel}</span>
-          <span className={styles.metaDot}>&middot;</span>
-          <span>{genres}</span>
+          <span className={`${styles.metaDot} ${styles.metaDesktopOnly}`}>
+            &middot;
+          </span>
+          <span className={styles.metaDesktopOnly}>{genres}</span>
         </div>
+        <p className={styles.metaGenresMobile}>{genres}</p>
         <a href="#" className={styles.buyTickets}>
           Buy tickets <span className={styles.buyArrow}>&#8599;</span>
         </a>
@@ -189,6 +261,9 @@ export default function HomeHero() {
             {list.map((movie, i) => (
               <button
                 key={movie.id}
+                ref={(el) => {
+                  cardRefs.current[i] = el;
+                }}
                 type="button"
                 title={movie.title}
                 aria-label={movie.title}
@@ -199,7 +274,7 @@ export default function HomeHero() {
                 style={
                   movie.poster_path
                     ? {
-                        backgroundImage: `url(${TMDB_IMAGE_BASE}w500${movie.poster_path})`,
+                        backgroundImage: `url(${TMDB_IMAGE_BASE}w342${movie.poster_path})`,
                       }
                     : undefined
                 }

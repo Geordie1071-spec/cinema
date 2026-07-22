@@ -24,3 +24,15 @@
 .websiteBy:hover {
   color: #fa315c;
 }
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 10px 16px;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+
+  .websiteBy {
+    gap: 6px;
+  }
+}
