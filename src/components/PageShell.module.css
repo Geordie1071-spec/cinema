@@ -8,3 +8,10 @@
   color: #f3f1ec;
   font-family: var(--font-sora), sans-serif;
 }
+
+.scrollable {
+  height: auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: visible;
+}

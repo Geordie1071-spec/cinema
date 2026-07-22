@@ -18,10 +18,18 @@
   -webkit-overflow-scrolling: touch;
   display: flex;
   justify-content: safe center;
+  cursor: grab;
+  touch-action: pan-x;
+  user-select: none;
 }
 
 .stripWrap::-webkit-scrollbar {
   display: none;
+}
+
+.dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
 }
 
 .strip {

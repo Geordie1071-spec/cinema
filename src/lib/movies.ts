@@ -1,4 +1,11 @@
-import type { GenreMap, Movie, MovieDetail, MovieImages } from "./types";
+import type {
+  ExtrasMap,
+  GenreMap,
+  Movie,
+  MovieDetail,
+  MovieImages,
+  MovieVideo,
+} from "./types";
 import { TMDB_IMAGE_BASE } from "./types";
 import { tmdbFetch } from "./tmdb-server";
 
@@ -17,11 +24,22 @@ export function pickLogoUrl(images: MovieImages): string | null {
   return en ? `${TMDB_IMAGE_BASE}w500${en.file_path}` : null;
 }
 
+export function pickTrailer(videos: MovieVideo[]): MovieVideo | null {
+  const yt = videos.filter((v) => v.site === "YouTube");
+  return (
+    yt.find((v) => v.type === "Trailer" && v.official) ||
+    yt.find((v) => v.type === "Trailer") ||
+    yt.find((v) => v.type === "Teaser") ||
+    yt[0] ||
+    null
+  );
+}
+
 export function backdropUrl(path: string | null, size = "w1280") {
   return path ? `${TMDB_IMAGE_BASE}${size}${path}` : "";
 }
 
-export function posterUrl(path: string | null, size = "w342") {
+export function posterUrl(path: string | null, size = "w500") {
   return path ? `${TMDB_IMAGE_BASE}${size}${path}` : "";
 }
 
@@ -49,7 +67,18 @@ export async function getUpcoming(): Promise<Movie[]> {
 
 export async function getMovieDetail(id: number): Promise<MovieDetail> {
   const data = await tmdbFetch(`/movie/${id}?language=en-US`);
-  return { id: data.id, runtime: data.runtime ?? null };
+  return {
+    id: data.id,
+    title: data.title,
+    overview: data.overview || "",
+    runtime: data.runtime ?? null,
+    release_date: data.release_date || "",
+    vote_average: data.vote_average ?? 0,
+    backdrop_path: data.backdrop_path,
+    poster_path: data.poster_path,
+    genres: data.genres || [],
+    tagline: data.tagline || "",
+  };
 }
 
 export async function getMovieImages(id: number): Promise<MovieImages> {
@@ -57,6 +86,11 @@ export async function getMovieImages(id: number): Promise<MovieImages> {
     `/movie/${id}/images?include_image_language=en,null`
   );
   return { logos: data.logos || [] };
+}
+
+export async function getMovieVideos(id: number): Promise<MovieVideo[]> {
+  const data = await tmdbFetch(`/movie/${id}/videos?language=en-US`);
+  return data.results || [];
 }
 
 export async function getMovieExtras(id: number) {
@@ -68,4 +102,59 @@ export async function getMovieExtras(id: number) {
     runtime: detail.runtime,
     logoUrl: pickLogoUrl(images),
   };
+}
+
+export async function getExtrasMap(movies: Movie[]): Promise<ExtrasMap> {
+  const unique = Array.from(new Map(movies.map((m) => [m.id, m])).values());
+  const entries = await Promise.all(
+    unique.map(async (m) => [m.id, await getMovieExtras(m.id)] as const)
+  );
+  return Object.fromEntries(entries);
+}
+
+export async function getMoviePageData(id: number) {
+  const [detail, images, videos] = await Promise.all([
+    getMovieDetail(id),
+    getMovieImages(id),
+    getMovieVideos(id),
+  ]);
+  return {
+    detail,
+    logoUrl: pickLogoUrl(images),
+    trailer: pickTrailer(videos),
+  };
+}
+
+/** Deterministic cinema showtimes for demo (TMDB has no showtimes). */
+export function getShowDates(movieId: number, releaseDate: string) {
+  const seed = movieId % 7;
+  const start = releaseDate ? new Date(`${releaseDate}T20:30:00`) : new Date();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let cursor = start < today ? new Date(today) : new Date(start);
+  cursor.setHours(0, 0, 0, 0);
+
+  const days: { date: string; label: string; times: string[] }[] = [];
+  for (let i = 0; i < 5; i++) {
+    const d = new Date(cursor);
+    d.setDate(cursor.getDate() + i);
+    const weekday = d.getDay();
+    const times =
+      weekday === 0 || weekday === 6
+        ? ["17:00", "20:30"]
+        : seed % 2 === i % 2
+          ? ["20:30"]
+          : ["18:15", "20:30"];
+    days.push({
+      date: d.toISOString().slice(0, 10),
+      label: d.toLocaleDateString("en-GB", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+      }),
+      times,
+    });
+  }
+  return days;
 }

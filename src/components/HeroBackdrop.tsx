@@ -2,16 +2,14 @@ import styles from "./HeroBackdrop.module.css";
 
 interface HeroBackdropProps {
   baseBg: string;
-  incomingBg: string | null;
-  revealing: boolean;
-  resetting: boolean;
+  overlayBg: string | null;
+  overlayVisible: boolean;
 }
 
 export default function HeroBackdrop({
   baseBg,
-  incomingBg,
-  revealing,
-  resetting,
+  overlayBg,
+  overlayVisible,
 }: HeroBackdropProps) {
   return (
     <>
@@ -20,11 +18,11 @@ export default function HeroBackdrop({
         style={baseBg ? { backgroundImage: `url(${baseBg})` } : undefined}
       />
       <div
-        className={`${styles.layer} ${styles.incoming} ${
-          resetting ? styles.reset : ""
-        } ${revealing ? styles.revealing : ""}`}
+        className={`${styles.layer} ${styles.overlay} ${
+          overlayVisible ? styles.overlayVisible : ""
+        }`}
         style={
-          incomingBg ? { backgroundImage: `url(${incomingBg})` } : undefined
+          overlayBg ? { backgroundImage: `url(${overlayBg})` } : undefined
         }
         aria-hidden
       />

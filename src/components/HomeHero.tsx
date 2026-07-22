@@ -3,154 +3,121 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchMovieExtras } from "@/lib/tmdb-client";
 import { backdropUrl, formatRuntime } from "@/lib/movies";
-import type { GenreMap, Movie } from "@/lib/types";
+import type { ExtrasMap, GenreMap, Movie, MovieExtras } from "@/lib/types";
 import HeroBackdrop from "./HeroBackdrop";
 import HeroCopy from "./HeroCopy";
 import MovieCarousel, { type MovieTab } from "./MovieCarousel";
 
-const REVEAL_MS = 320;
-const TAB_SWITCH_MS = 180;
-
-export interface MovieExtras {
-  runtime: number | null;
-  logoUrl: string | null;
-}
+const FADE_MS = 550;
+const TAB_SWITCH_MS = 160;
 
 interface HomeHeroProps {
   nowPlaying: Movie[];
   upcoming: Movie[];
   genreMap: GenreMap;
-  initialExtras: MovieExtras | null;
-}
-
-function preloadImage(src: string) {
-  return new Promise<void>((resolve) => {
-    if (!src) {
-      resolve();
-      return;
-    }
-    const img = new Image();
-    img.onload = () => resolve();
-    img.onerror = () => resolve();
-    img.src = src;
-  });
+  extrasById: ExtrasMap;
 }
 
 export default function HomeHero({
   nowPlaying,
   upcoming,
   genreMap,
-  initialExtras,
+  extrasById,
 }: HomeHeroProps) {
   const [tab, setTab] = useState<MovieTab>("now");
+  const [extras, setExtras] = useState<ExtrasMap>(extrasById);
   const [active, setActiveMovie] = useState<Movie | null>(
     nowPlaying[0] ?? null
-  );
-  const [runtime, setRuntime] = useState<number | null>(
-    initialExtras?.runtime ?? null
-  );
-  const [logoUrl, setLogoUrl] = useState<string | null>(
-    initialExtras?.logoUrl ?? null
   );
   const [index, setIndex] = useState(0);
   const [baseBg, setBaseBg] = useState(() =>
     backdropUrl(nowPlaying[0]?.backdrop_path ?? null)
   );
-  const [incomingBg, setIncomingBg] = useState<string | null>(null);
-  const [revealing, setRevealing] = useState(false);
-  const [resetting, setResetting] = useState(false);
+  const [overlayBg, setOverlayBg] = useState<string | null>(null);
+  const [overlayVisible, setOverlayVisible] = useState(false);
   const [switching, setSwitching] = useState(false);
 
-  const revealTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fadeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tabTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeIdRef = useRef<number | null>(nowPlaying[0]?.id ?? null);
-  const incomingBgRef = useRef<string | null>(null);
+  const baseBgRef = useRef(baseBg);
+  const overlayBgRef = useRef<string | null>(null);
+  const overlayVisibleRef = useRef(false);
   const genRef = useRef(0);
+  const extrasRef = useRef(extras);
 
   const list = tab === "now" ? nowPlaying : upcoming;
+  const activeExtras: MovieExtras | null = active
+    ? extras[active.id] ?? null
+    : null;
 
-  const setActive = useCallback(
-    (movie: Movie | null, instant = false, extras?: MovieExtras | null) => {
-      if (!movie) return;
-      if (!instant && activeIdRef.current === movie.id) return;
-      activeIdRef.current = movie.id;
-      const gen = ++genRef.current;
-      const backdrop = backdropUrl(movie.backdrop_path);
+  useEffect(() => {
+    extrasRef.current = extras;
+  }, [extras]);
 
-      setActiveMovie(movie);
+  const ensureExtras = useCallback((movieId: number) => {
+    if (extrasRef.current[movieId]) return;
+    fetchMovieExtras(movieId)
+      .then((next) => {
+        setExtras((prev) =>
+          prev[movieId] ? prev : { ...prev, [movieId]: next }
+        );
+      })
+      .catch(() => {});
+  }, []);
 
-      if (extras) {
-        setRuntime(extras.runtime);
-        setLogoUrl(extras.logoUrl);
-      } else {
-        setRuntime(null);
-        setLogoUrl(null);
-      }
+  const setActive = useCallback((movie: Movie | null, instant = false) => {
+    if (!movie) return;
+    if (!instant && activeIdRef.current === movie.id) return;
+    activeIdRef.current = movie.id;
+    const gen = ++genRef.current;
+    const nextBg = backdropUrl(movie.backdrop_path);
 
-      if (revealTimeout.current) clearTimeout(revealTimeout.current);
+    setActiveMovie(movie);
+    ensureExtras(movie.id);
 
-      const finishCrossfade = () => {
+    if (fadeTimeout.current) clearTimeout(fadeTimeout.current);
+
+    if (instant || !nextBg || nextBg === baseBgRef.current) {
+      overlayBgRef.current = null;
+      overlayVisibleRef.current = false;
+      baseBgRef.current = nextBg;
+      setBaseBg(nextBg);
+      setOverlayBg(null);
+      setOverlayVisible(false);
+      return;
+    }
+
+    // Soft crossfade: fade the next backdrop over the current one.
+    if (overlayBgRef.current && overlayVisibleRef.current) {
+      baseBgRef.current = overlayBgRef.current;
+      setBaseBg(overlayBgRef.current);
+    }
+
+    overlayBgRef.current = nextBg;
+    overlayVisibleRef.current = false;
+    setOverlayBg(nextBg);
+    setOverlayVisible(false);
+
+    requestAnimationFrame(() => {
+      if (gen !== genRef.current) return;
+      overlayVisibleRef.current = true;
+      setOverlayVisible(true);
+      fadeTimeout.current = setTimeout(() => {
         if (gen !== genRef.current) return;
-        setBaseBg(backdrop);
-        incomingBgRef.current = null;
-        setIncomingBg(null);
-        setRevealing(false);
-        setResetting(false);
-      };
-
-      const startCrossfade = async () => {
-        if (gen !== genRef.current) return;
-
-        if (instant || !backdrop) {
-          incomingBgRef.current = null;
-          setBaseBg(backdrop);
-          setIncomingBg(null);
-          setRevealing(false);
-          setResetting(false);
-          return;
-        }
-
-        await preloadImage(backdrop);
-        if (gen !== genRef.current) return;
-
-        if (incomingBgRef.current) {
-          setBaseBg(incomingBgRef.current);
-        }
-
-        incomingBgRef.current = backdrop;
-        setResetting(true);
-        setRevealing(false);
-        setIncomingBg(backdrop);
-
-        requestAnimationFrame(() => {
-          if (gen !== genRef.current) return;
-          setResetting(false);
-          requestAnimationFrame(() => {
-            if (gen !== genRef.current) return;
-            setRevealing(true);
-            revealTimeout.current = setTimeout(finishCrossfade, REVEAL_MS);
-          });
-        });
-      };
-
-      void startCrossfade();
-
-      if (!extras) {
-        fetchMovieExtras(movie.id)
-          .then((next) => {
-            if (activeIdRef.current !== movie.id) return;
-            setRuntime(next.runtime);
-            setLogoUrl(next.logoUrl);
-          })
-          .catch(() => {});
-      }
-    },
-    []
-  );
+        baseBgRef.current = nextBg;
+        overlayBgRef.current = null;
+        overlayVisibleRef.current = false;
+        setBaseBg(nextBg);
+        setOverlayBg(null);
+        setOverlayVisible(false);
+      }, FADE_MS);
+    });
+  }, [ensureExtras]);
 
   useEffect(() => {
     return () => {
-      if (revealTimeout.current) clearTimeout(revealTimeout.current);
+      if (fadeTimeout.current) clearTimeout(fadeTimeout.current);
       if (tabTimeout.current) clearTimeout(tabTimeout.current);
     };
   }, []);
@@ -172,13 +139,7 @@ export default function HomeHero({
       setTab(nextTab);
       setIndex(0);
       setSwitching(false);
-      if (nextList[0]) {
-        const extras =
-          nextTab === "now" && nextList[0].id === nowPlaying[0]?.id
-            ? initialExtras
-            : null;
-        setActive(nextList[0], true, extras);
-      }
+      if (nextList[0]) setActive(nextList[0], true);
     }, TAB_SWITCH_MS);
   };
 
@@ -197,17 +158,17 @@ export default function HomeHero({
     <>
       <HeroBackdrop
         baseBg={baseBg}
-        incomingBg={incomingBg}
-        revealing={revealing}
-        resetting={resetting}
+        overlayBg={overlayBg}
+        overlayVisible={overlayVisible}
       />
       <HeroCopy
+        movieId={active?.id ?? null}
         title={heroTitle}
-        logoUrl={logoUrl}
+        logoUrl={activeExtras?.logoUrl ?? null}
         showRating={showRating}
         rating={active?.vote_average ?? 0}
         year={year}
-        runtimeLabel={formatRuntime(runtime)}
+        runtimeLabel={formatRuntime(activeExtras?.runtime)}
         genres={genres}
       />
       <MovieCarousel

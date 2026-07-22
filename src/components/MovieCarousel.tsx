@@ -24,9 +24,24 @@ export default function MovieCarousel({
   onSelectIndex,
   onSelectTab,
 }: MovieCarouselProps) {
+  const wrapRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const dragRef = useRef<{
+    active: boolean;
+    moved: boolean;
+    startX: number;
+    scrollLeft: number;
+    pointerId: number | null;
+  }>({
+    active: false,
+    moved: false,
+    startX: 0,
+    scrollLeft: 0,
+    pointerId: null,
+  });
 
   useEffect(() => {
+    if (dragRef.current.active) return;
     const card = cardRefs.current[activeIndex];
     card?.scrollIntoView({
       behavior: "smooth",
@@ -35,9 +50,74 @@ export default function MovieCarousel({
     });
   }, [activeIndex, tab, movies]);
 
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = wrapRef.current;
+    if (!el) return;
+    dragRef.current = {
+      active: true,
+      moved: false,
+      startX: e.clientX,
+      scrollLeft: el.scrollLeft,
+      pointerId: e.pointerId,
+    };
+    el.setPointerCapture(e.pointerId);
+    el.classList.add(styles.dragging);
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = wrapRef.current;
+    const drag = dragRef.current;
+    if (!el || !drag.active) return;
+    const dx = e.clientX - drag.startX;
+    if (Math.abs(dx) > 6) drag.moved = true;
+    el.scrollLeft = drag.scrollLeft - dx;
+  };
+
+  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = wrapRef.current;
+    const drag = dragRef.current;
+    if (!el || !drag.active) return;
+    if (drag.pointerId != null) {
+      try {
+        el.releasePointerCapture(drag.pointerId);
+      } catch {
+        /* already released */
+      }
+    }
+    el.classList.remove(styles.dragging);
+    drag.active = false;
+
+    // Snap to nearest poster and select it after a drag.
+    if (drag.moved) {
+      const cards = cardRefs.current.filter(Boolean) as HTMLButtonElement[];
+      if (!cards.length) return;
+      const wrapRect = el.getBoundingClientRect();
+      const center = wrapRect.left + wrapRect.width / 2;
+      let best = 0;
+      let bestDist = Infinity;
+      cards.forEach((card, i) => {
+        const r = card.getBoundingClientRect();
+        const mid = r.left + r.width / 2;
+        const dist = Math.abs(mid - center);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = i;
+        }
+      });
+      onSelectIndex(best);
+    }
+  };
+
   return (
     <section className={styles.section}>
-      <div className={styles.stripWrap}>
+      <div
+        ref={wrapRef}
+        className={styles.stripWrap}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+      >
         <div
           className={`${styles.strip} ${switching ? styles.switching : ""}`}
         >
@@ -46,7 +126,10 @@ export default function MovieCarousel({
               key={movie.id}
               movie={movie}
               active={i === activeIndex}
-              onSelect={() => onSelectIndex(i)}
+              onSelect={() => {
+                if (dragRef.current.moved) return;
+                onSelectIndex(i);
+              }}
               cardRef={(el) => {
                 cardRefs.current[i] = el;
               }}

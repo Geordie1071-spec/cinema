@@ -1,8 +1,10 @@
+import Link from "next/link";
 import BuyTicketsLink from "./BuyTicketsLink";
 import MovieMeta from "./MovieMeta";
 import styles from "./HeroCopy.module.css";
 
 interface HeroCopyProps {
+  movieId: number | null;
   title: string;
   logoUrl: string | null;
   showRating: boolean;
@@ -13,6 +15,7 @@ interface HeroCopyProps {
 }
 
 export default function HeroCopy({
+  movieId,
   title,
   logoUrl,
   showRating,
@@ -21,17 +24,21 @@ export default function HeroCopy({
   runtimeLabel,
   genres,
 }: HeroCopyProps) {
+  const detailHref = movieId ? `/movies/${movieId}` : "/";
+
   return (
     <main className={styles.main}>
       {logoUrl ? (
-        <div
-          role="img"
+        <Link
+          href={detailHref}
           aria-label={title}
           className={styles.logo}
           style={{ backgroundImage: `url(${logoUrl})` }}
         />
       ) : (
-        <h1 className={styles.title}>{title}</h1>
+        <h1 className={styles.title}>
+          <Link href={detailHref}>{title}</Link>
+        </h1>
       )}
       <MovieMeta
         showRating={showRating}
@@ -40,7 +47,7 @@ export default function HeroCopy({
         runtimeLabel={runtimeLabel}
         genres={genres}
       />
-      <BuyTicketsLink className={styles.cta} />
+      <BuyTicketsLink href={detailHref} className={styles.cta} />
     </main>
   );
 }

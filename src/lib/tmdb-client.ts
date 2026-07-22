@@ -7,12 +7,10 @@ async function getJson<T>(url: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-/** Client-side detail fetch used when switching active movies. */
 export async function fetchMovieDetail(id: number): Promise<MovieDetail> {
   return getJson<MovieDetail>(`/api/tmdb/movies/${id}`);
 }
 
-/** Client-side images fetch used when switching active movies. */
 export async function fetchMovieImages(id: number): Promise<MovieImages> {
   return getJson<MovieImages>(`/api/tmdb/movies/${id}/images`);
 }
@@ -28,7 +26,6 @@ export async function fetchMovieExtras(id: number) {
   };
 }
 
-// Kept for any client-only consumers; home page prefers SSR via lib/movies.
 export async function fetchGenreMap(): Promise<GenreMap> {
   const data = await getJson<{ genres: { id: number; name: string }[] }>(
     "/api/tmdb/genres"

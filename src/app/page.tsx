@@ -1,7 +1,12 @@
 import AppChrome from "@/components/AppChrome";
 import HomeHero from "@/components/HomeHero";
 import PageShell from "@/components/PageShell";
-import { getGenreMap, getMovieExtras, getNowPlaying, getUpcoming } from "@/lib/movies";
+import {
+  getExtrasMap,
+  getGenreMap,
+  getNowPlaying,
+  getUpcoming,
+} from "@/lib/movies";
 
 export default async function HomePage() {
   const [genreMap, nowPlaying, upcoming] = await Promise.all([
@@ -10,9 +15,7 @@ export default async function HomePage() {
     getUpcoming(),
   ]);
 
-  const initialExtras = nowPlaying[0]
-    ? await getMovieExtras(nowPlaying[0].id)
-    : null;
+  const extrasById = await getExtrasMap([...nowPlaying, ...upcoming]);
 
   return (
     <PageShell>
@@ -21,7 +24,7 @@ export default async function HomePage() {
           nowPlaying={nowPlaying}
           upcoming={upcoming}
           genreMap={genreMap}
-          initialExtras={initialExtras}
+          extrasById={extrasById}
         />
       </AppChrome>
     </PageShell>
