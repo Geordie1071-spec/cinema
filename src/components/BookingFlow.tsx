@@ -3,15 +3,18 @@
 import { useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import {
-  AISLE_AFTER,
-  SEAT_ROWS,
-  SEATS_PER_ROW,
-  TICKET_PRICE_EUR,
+  DEFAULT_TICKET_TYPE,
+  TICKET_TYPES,
   bookingTotal,
   formatSeatList,
+  ticketPrice,
+  ticketTypeLabel,
   type SeatId,
+  type SeatTicketMap,
+  type TicketTypeId,
 } from "@/lib/seating";
 import { posterUrl } from "@/lib/movies";
+import SeatMap from "./SeatMap";
 import styles from "./BookingFlow.module.css";
 
 export interface BookingMovie {
@@ -40,28 +43,55 @@ export default function BookingFlow({
 }: BookingFlowProps) {
   const occupiedSet = useMemo(() => new Set(occupied), [occupied]);
   const [selected, setSelected] = useState<SeatId[]>([]);
+  const [ticketTypes, setTicketTypes] = useState<SeatTicketMap>({});
   const [step, setStep] = useState<Step>("seats");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
-  const total = bookingTotal(selected.length);
+  const total = bookingTotal(selected, ticketTypes);
   const poster = posterUrl(movie.poster_path, "w342");
+  const sortedSeats = useMemo(() => [...selected].sort(), [selected]);
 
   const toggleSeat = (id: SeatId) => {
     if (occupiedSet.has(id)) return;
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
+    setSelected((prev) => {
+      if (prev.includes(id)) {
+        setTicketTypes((types) => {
+          const next = { ...types };
+          delete next[id];
+          return next;
+        });
+        return prev.filter((s) => s !== id);
+      }
+      setTicketTypes((types) => ({
+        ...types,
+        [id]: types[id] ?? DEFAULT_TICKET_TYPE,
+      }));
+      return [...prev, id];
+    });
+  };
+
+  const setSeatType = (seat: SeatId, type: TicketTypeId) => {
+    setTicketTypes((prev) => ({ ...prev, [seat]: type }));
   };
 
   const goCheckout = () => {
     if (!selected.length) return;
+    setTicketTypes((prev) => {
+      const next = { ...prev };
+      for (const seat of selected) {
+        if (!next[seat]) next[seat] = DEFAULT_TICKET_TYPE;
+      }
+      return next;
+    });
     setStep("checkout");
   };
 
   const onConfirm = (e: FormEvent) => {
     e.preventDefault();
     if (!selected.length || !name.trim() || !email.trim()) return;
+    const missing = selected.some((s) => !ticketTypes[s]);
+    if (missing) return;
     setStep("done");
   };
 
@@ -123,43 +153,11 @@ export default function BookingFlow({
               </span>
             </div>
 
-            <div className={styles.map} role="group" aria-label="Seat map">
-              {SEAT_ROWS.map((row) => (
-                <div key={row} className={styles.row}>
-                  <span className={styles.rowLabel}>{row}</span>
-                  <div className={styles.rowSeats}>
-                    {Array.from({ length: SEATS_PER_ROW }, (_, i) => {
-                      const num = i + 1;
-                      const id = `${row}${num}` as SeatId;
-                      const isTaken = occupiedSet.has(id);
-                      const isSelected = selected.includes(id);
-                      return (
-                        <button
-                          key={id}
-                          type="button"
-                          disabled={isTaken}
-                          aria-pressed={isSelected}
-                          aria-label={`Seat ${id}${
-                            isTaken ? " taken" : isSelected ? " selected" : ""
-                          }`}
-                          onClick={() => toggleSeat(id)}
-                          className={`${styles.seat} ${
-                            isTaken
-                              ? styles.taken
-                              : isSelected
-                                ? styles.picked
-                                : styles.free
-                          } ${num === AISLE_AFTER ? styles.aisleAfter : ""}`}
-                        >
-                          {num}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <span className={styles.rowLabel}>{row}</span>
-                </div>
-              ))}
-            </div>
+            <SeatMap
+              occupied={occupiedSet}
+              selected={selected}
+              onToggle={toggleSeat}
+            />
 
             <div className={styles.summaryBar}>
               <div>
@@ -169,10 +167,10 @@ export default function BookingFlow({
                     : "Select one or more seats"}
                 </p>
                 <p className={styles.summaryTotal}>
-                  €{total.toFixed(2)}
+                  from €{(selected.length * ticketPrice("child")).toFixed(2)}
                   <span className={styles.summaryNote}>
                     {" "}
-                    · €{TICKET_PRICE_EUR} each
+                    · ticket type chosen at checkout
                   </span>
                 </p>
               </div>
@@ -224,6 +222,45 @@ export default function BookingFlow({
               </aside>
 
               <form className={styles.form} onSubmit={onConfirm}>
+                <fieldset className={styles.ticketFieldset}>
+                  <legend className={styles.ticketLegend}>
+                    Ticket type per seat
+                  </legend>
+                  <p className={styles.ticketHint}>
+                    Adult €{ticketPrice("adult")} · Child €
+                    {ticketPrice("child")} · Elderly €
+                    {ticketPrice("elderly")}
+                  </p>
+                  <div className={styles.ticketList}>
+                    {sortedSeats.map((seat) => {
+                      const type = ticketTypes[seat] ?? DEFAULT_TICKET_TYPE;
+                      return (
+                        <label key={seat} className={styles.ticketRow}>
+                          <span className={styles.ticketSeat}>{seat}</span>
+                          <select
+                            required
+                            value={type}
+                            onChange={(e) =>
+                              setSeatType(
+                                seat,
+                                e.target.value as TicketTypeId
+                              )
+                            }
+                            className={styles.select}
+                            aria-label={`Ticket type for seat ${seat}`}
+                          >
+                            {TICKET_TYPES.map((t) => (
+                              <option key={t.id} value={t.id}>
+                                {t.label} — €{t.price}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+
                 <label className={styles.field}>
                   <span>Full name</span>
                   <input
@@ -253,7 +290,7 @@ export default function BookingFlow({
                   This is a demo checkout — no payment is processed.
                 </p>
                 <button type="submit" className={styles.primary}>
-                  Confirm booking
+                  Confirm booking · €{total.toFixed(2)}
                 </button>
               </form>
             </div>
@@ -269,9 +306,18 @@ export default function BookingFlow({
                 {name}, your tickets for <strong>{movie.title}</strong> on{" "}
                 {dateLabel} at {time} are confirmed.
               </p>
-              <p className={styles.doneSeats}>
-                Seats {formatSeatList(selected)} · €{total.toFixed(2)}
-              </p>
+              <ul className={styles.doneTicketList}>
+                {sortedSeats.map((seat) => {
+                  const type = ticketTypes[seat] ?? DEFAULT_TICKET_TYPE;
+                  return (
+                    <li key={seat}>
+                      Seat {seat} · {ticketTypeLabel(type)} · €
+                      {ticketPrice(type).toFixed(2)}
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className={styles.doneSeats}>Total €{total.toFixed(2)}</p>
               <p className={styles.formNote}>
                 A confirmation would be sent to {email}.
               </p>
@@ -287,7 +333,6 @@ export default function BookingFlow({
           </section>
         ) : null}
 
-        {/* Keep date in DOM for debugging / future API use */}
         <span hidden>{date}</span>
       </div>
     </main>

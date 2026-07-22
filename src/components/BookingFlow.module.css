@@ -141,77 +141,19 @@
   display: inline-block;
 }
 
-.map {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-width: max-content;
-  margin: 0 auto;
-}
-
-.rowLabel {
-  width: 18px;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(243, 241, 236, 0.45);
-}
-
-.rowSeats {
-  display: flex;
-  gap: 6px;
-}
-
-.seat {
-  width: 34px;
-  height: 34px;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  font-family: var(--font-sora), sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-  transition: transform 0.15s ease, background 0.15s, border-color 0.15s;
-}
-
-.seat:disabled {
-  cursor: not-allowed;
-}
-
-.seat:not(:disabled):hover {
-  transform: translateY(-1px);
-}
-
-.aisleAfter {
-  margin-right: 14px;
-}
-
 .free {
   background: rgba(243, 241, 236, 0.08);
-  border-color: rgba(243, 241, 236, 0.22);
-  color: #f3f1ec;
+  border: 1px solid rgba(243, 241, 236, 0.22);
 }
 
 .picked {
   background: #fa315c;
-  border-color: #fa315c;
-  color: #fff;
+  border: 1px solid #fa315c;
 }
 
 .taken {
   background: rgba(243, 241, 236, 0.04);
-  border-color: rgba(243, 241, 236, 0.08);
-  color: rgba(243, 241, 236, 0.25);
+  border: 1px solid rgba(243, 241, 236, 0.08);
 }
 
 .summaryBar {
@@ -341,6 +283,62 @@
   gap: 14px;
 }
 
+.ticketFieldset {
+  border: 1px solid rgba(243, 241, 236, 0.12);
+  padding: 16px;
+  margin: 0 0 4px;
+}
+
+.ticketLegend {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fa315c;
+  padding: 0 6px;
+}
+
+.ticketHint {
+  font-size: 12px;
+  color: rgba(243, 241, 236, 0.45);
+  margin: 4px 0 14px;
+}
+
+.ticketList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ticketRow {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.ticketSeat {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f3f1ec;
+}
+
+.select {
+  width: 100%;
+  background: #0a0a0b;
+  border: 1px solid rgba(243, 241, 236, 0.22);
+  color: #f3f1ec;
+  font-family: var(--font-sora), sans-serif;
+  font-size: 14px;
+  padding: 12px 14px;
+  outline: none;
+  cursor: pointer;
+}
+
+.select:focus {
+  border-color: rgba(250, 49, 92, 0.7);
+}
+
 .field {
   display: grid;
   gap: 8px;
@@ -398,6 +396,16 @@
   margin-bottom: 14px;
 }
 
+.doneTicketList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #e9e6df;
+}
+
 .doneSeats {
   font-size: 18px;
   font-weight: 600;
@@ -416,11 +424,6 @@
   .checkoutGrid {
     grid-template-columns: 1fr;
   }
-
-  .seat {
-    width: 30px;
-    height: 30px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -432,18 +435,12 @@
     padding: 22px 14px 16px;
   }
 
-  .seat {
-    width: 26px;
-    height: 26px;
-    font-size: 10px;
-  }
-
-  .aisleAfter {
-    margin-right: 10px;
-  }
-
   .summaryBar {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .ticketRow {
+    grid-template-columns: 44px 1fr;
   }
 }

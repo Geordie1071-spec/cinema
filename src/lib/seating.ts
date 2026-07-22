@@ -1,9 +1,17 @@
 export const SEAT_ROWS = ["A", "B", "C", "D", "E", "F", "G", "H"] as const;
 export const SEATS_PER_ROW = 12;
-export const AISLE_AFTER = 6;
-export const TICKET_PRICE_EUR = 8;
 
+export const TICKET_TYPES = [
+  { id: "adult", label: "Adult", price: 8 },
+  { id: "child", label: "Child", price: 5 },
+  { id: "elderly", label: "Elderly", price: 6 },
+] as const;
+
+export type TicketTypeId = (typeof TICKET_TYPES)[number]["id"];
 export type SeatId = `${(typeof SEAT_ROWS)[number]}${number}`;
+export type SeatTicketMap = Partial<Record<SeatId, TicketTypeId>>;
+
+export const DEFAULT_TICKET_TYPE: TicketTypeId = "adult";
 
 function hashSeed(input: string) {
   let h = 0;
@@ -38,6 +46,17 @@ export function formatSeatList(seats: string[]) {
   return [...seats].sort().join(", ");
 }
 
-export function bookingTotal(seatCount: number) {
-  return seatCount * TICKET_PRICE_EUR;
+export function ticketPrice(type: TicketTypeId) {
+  return TICKET_TYPES.find((t) => t.id === type)?.price ?? 8;
+}
+
+export function bookingTotal(seats: string[], types: SeatTicketMap) {
+  return seats.reduce((sum, seat) => {
+    const type = types[seat as SeatId] ?? DEFAULT_TICKET_TYPE;
+    return sum + ticketPrice(type);
+  }, 0);
+}
+
+export function ticketTypeLabel(type: TicketTypeId) {
+  return TICKET_TYPES.find((t) => t.id === type)?.label ?? "Adult";
 }
