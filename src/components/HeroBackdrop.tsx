@@ -4,12 +4,14 @@ interface HeroBackdropProps {
   baseBg: string;
   overlayBg: string | null;
   overlayVisible: boolean;
+  overlayInstant?: boolean;
 }
 
 export default function HeroBackdrop({
   baseBg,
   overlayBg,
   overlayVisible,
+  overlayInstant = false,
 }: HeroBackdropProps) {
   return (
     <>
@@ -19,8 +21,8 @@ export default function HeroBackdrop({
       />
       <div
         className={`${styles.layer} ${styles.overlay} ${
-          overlayVisible ? styles.overlayVisible : ""
-        }`}
+          overlayInstant ? styles.overlayInstant : ""
+        } ${overlayVisible ? styles.overlayVisible : ""}`}
         style={
           overlayBg ? { backgroundImage: `url(${overlayBg})` } : undefined
         }

@@ -193,6 +193,8 @@
   font-weight: 600;
   padding: 10px 12px;
   cursor: pointer;
+  text-align: center;
+  text-decoration: none;
   transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
 

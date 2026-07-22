@@ -8,8 +8,12 @@
 
 .overlay {
   opacity: 0;
-  transition: opacity 0.55s ease;
+  transition: opacity 0.5s ease;
   pointer-events: none;
+}
+
+.overlayInstant {
+  transition: none;
 }
 
 .overlayVisible {

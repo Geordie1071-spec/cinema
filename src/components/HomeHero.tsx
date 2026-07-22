@@ -8,7 +8,7 @@ import HeroBackdrop from "./HeroBackdrop";
 import HeroCopy from "./HeroCopy";
 import MovieCarousel, { type MovieTab } from "./MovieCarousel";
 
-const FADE_MS = 550;
+const FADE_MS = 500;
 const TAB_SWITCH_MS = 160;
 
 interface HomeHeroProps {
@@ -35,6 +35,7 @@ export default function HomeHero({
   );
   const [overlayBg, setOverlayBg] = useState<string | null>(null);
   const [overlayVisible, setOverlayVisible] = useState(false);
+  const [overlayInstant, setOverlayInstant] = useState(false);
   const [switching, setSwitching] = useState(false);
 
   const fadeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -66,54 +67,76 @@ export default function HomeHero({
       .catch(() => {});
   }, []);
 
-  const setActive = useCallback((movie: Movie | null, instant = false) => {
-    if (!movie) return;
-    if (!instant && activeIdRef.current === movie.id) return;
-    activeIdRef.current = movie.id;
-    const gen = ++genRef.current;
-    const nextBg = backdropUrl(movie.backdrop_path);
-
-    setActiveMovie(movie);
-    ensureExtras(movie.id);
-
-    if (fadeTimeout.current) clearTimeout(fadeTimeout.current);
-
-    if (instant || !nextBg || nextBg === baseBgRef.current) {
-      overlayBgRef.current = null;
-      overlayVisibleRef.current = false;
-      baseBgRef.current = nextBg;
-      setBaseBg(nextBg);
-      setOverlayBg(null);
-      setOverlayVisible(false);
-      return;
-    }
-
-    // Soft crossfade: fade the next backdrop over the current one.
-    if (overlayBgRef.current && overlayVisibleRef.current) {
-      baseBgRef.current = overlayBgRef.current;
-      setBaseBg(overlayBgRef.current);
-    }
-
-    overlayBgRef.current = nextBg;
+  const commitOverlayToBase = useCallback((url: string) => {
+    baseBgRef.current = url;
+    setBaseBg(url);
+    // Hide overlay instantly (no fade-out) so the image doesn't flash.
+    setOverlayInstant(true);
     overlayVisibleRef.current = false;
-    setOverlayBg(nextBg);
+    overlayBgRef.current = null;
     setOverlayVisible(false);
-
+    setOverlayBg(null);
     requestAnimationFrame(() => {
-      if (gen !== genRef.current) return;
-      overlayVisibleRef.current = true;
-      setOverlayVisible(true);
-      fadeTimeout.current = setTimeout(() => {
-        if (gen !== genRef.current) return;
-        baseBgRef.current = nextBg;
-        overlayBgRef.current = null;
-        overlayVisibleRef.current = false;
-        setBaseBg(nextBg);
-        setOverlayBg(null);
-        setOverlayVisible(false);
-      }, FADE_MS);
+      setOverlayInstant(false);
     });
-  }, [ensureExtras]);
+  }, []);
+
+  const setActive = useCallback(
+    (movie: Movie | null, instant = false) => {
+      if (!movie) return;
+      if (!instant && activeIdRef.current === movie.id) return;
+      activeIdRef.current = movie.id;
+      const gen = ++genRef.current;
+      const nextBg = backdropUrl(movie.backdrop_path);
+
+      setActiveMovie(movie);
+      ensureExtras(movie.id);
+
+      if (fadeTimeout.current) clearTimeout(fadeTimeout.current);
+
+      if (instant || !nextBg || nextBg === baseBgRef.current) {
+        if (overlayVisibleRef.current && overlayBgRef.current) {
+          commitOverlayToBase(overlayBgRef.current);
+        }
+        baseBgRef.current = nextBg;
+        setBaseBg(nextBg);
+        setOverlayInstant(true);
+        overlayVisibleRef.current = false;
+        overlayBgRef.current = null;
+        setOverlayVisible(false);
+        setOverlayBg(null);
+        requestAnimationFrame(() => setOverlayInstant(false));
+        return;
+      }
+
+      // If a fade is mid-flight, lock the visible overlay onto the base first.
+      if (overlayBgRef.current && overlayVisibleRef.current) {
+        commitOverlayToBase(overlayBgRef.current);
+      }
+
+      // Arm the next backdrop at opacity 0 without animating, then fade in.
+      overlayBgRef.current = nextBg;
+      setOverlayInstant(true);
+      setOverlayBg(nextBg);
+      setOverlayVisible(false);
+      overlayVisibleRef.current = false;
+
+      requestAnimationFrame(() => {
+        if (gen !== genRef.current) return;
+        setOverlayInstant(false);
+        requestAnimationFrame(() => {
+          if (gen !== genRef.current) return;
+          overlayVisibleRef.current = true;
+          setOverlayVisible(true);
+          fadeTimeout.current = setTimeout(() => {
+            if (gen !== genRef.current) return;
+            commitOverlayToBase(nextBg);
+          }, FADE_MS);
+        });
+      });
+    },
+    [commitOverlayToBase, ensureExtras]
+  );
 
   useEffect(() => {
     return () => {
@@ -160,6 +183,7 @@ export default function HomeHero({
         baseBg={baseBg}
         overlayBg={overlayBg}
         overlayVisible={overlayVisible}
+        overlayInstant={overlayInstant}
       />
       <HeroCopy
         movieId={active?.id ?? null}

@@ -120,10 +120,14 @@ export default function MovieDetailView({
               <div key={day.date} className={styles.showDay}>
                 <h3 className={styles.showLabel}>{day.label}</h3>
                 <div className={styles.times}>
-                  {day.times.map((time) => (
-                    <button key={time} type="button" className={styles.timeBtn}>
-                      {time}
-                    </button>
+                  {day.times.map((t) => (
+                    <Link
+                      key={t}
+                      href={`/movies/${detail.id}/book?date=${encodeURIComponent(day.date)}&time=${encodeURIComponent(t)}`}
+                      className={styles.timeBtn}
+                    >
+                      {t}
+                    </Link>
                   ))}
                 </div>
               </div>
