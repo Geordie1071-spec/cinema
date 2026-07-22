@@ -1,4 +1,3 @@
-import AppChrome from "@/components/AppChrome";
 import HomeHero from "@/components/HomeHero";
 import PageShell from "@/components/PageShell";
 import {
@@ -19,14 +18,12 @@ export default async function HomePage() {
 
   return (
     <PageShell>
-      <AppChrome>
-        <HomeHero
-          nowPlaying={nowPlaying}
-          upcoming={upcoming}
-          genreMap={genreMap}
-          extrasById={extrasById}
-        />
-      </AppChrome>
+      <HomeHero
+        nowPlaying={nowPlaying}
+        upcoming={upcoming}
+        genreMap={genreMap}
+        extrasById={extrasById}
+      />
     </PageShell>
   );
 }

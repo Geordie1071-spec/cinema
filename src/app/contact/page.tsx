@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import AppChrome from "@/components/AppChrome";
 import ContactForm from "@/components/ContactForm";
 import PageShell from "@/components/PageShell";
 
@@ -12,9 +11,7 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <PageShell>
-      <AppChrome>
-        <ContactForm />
-      </AppChrome>
+      <ContactForm />
     </PageShell>
   );
 }

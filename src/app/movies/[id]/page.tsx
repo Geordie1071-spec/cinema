@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import AppChrome from "@/components/AppChrome";
 import MovieDetailView from "@/components/MovieDetailView";
 import PageShell from "@/components/PageShell";
 import { getMoviePageData, getShowDates } from "@/lib/movies";
@@ -18,7 +17,9 @@ export async function generateMetadata({
     const { detail } = await getMoviePageData(Number(id));
     return {
       title: `${detail.title} — Citadel Cinema`,
-      description: detail.overview || `Showtimes for ${detail.title} at Citadel Cinema.`,
+      description:
+        detail.overview ||
+        `Showtimes for ${detail.title} at Citadel Cinema.`,
     };
   } catch {
     return { title: "Film — Citadel Cinema" };
@@ -40,9 +41,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
   return (
     <PageShell scrollable>
-      <AppChrome>
-        <MovieDetailView data={data} showtimes={showtimes} />
-      </AppChrome>
+      <MovieDetailView data={data} showtimes={showtimes} />
     </PageShell>
   );
 }

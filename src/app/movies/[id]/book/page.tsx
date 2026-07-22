@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import AppChrome from "@/components/AppChrome";
 import BookingFlow from "@/components/BookingFlow";
 import PageShell from "@/components/PageShell";
 import { formatRuntime, getMovieDetail, getShowDates } from "@/lib/movies";
@@ -55,20 +54,18 @@ export default async function BookPage({ params, searchParams }: BookPageProps) 
 
   return (
     <PageShell scrollable>
-      <AppChrome>
-        <BookingFlow
-          movie={{
-            id: detail.id,
-            title: detail.title,
-            poster_path: detail.poster_path,
-            runtimeLabel: formatRuntime(detail.runtime),
-          }}
-          date={date}
-          dateLabel={day.label}
-          time={time}
-          occupied={occupied}
-        />
-      </AppChrome>
+      <BookingFlow
+        movie={{
+          id: detail.id,
+          title: detail.title,
+          poster_path: detail.poster_path,
+          runtimeLabel: formatRuntime(detail.runtime),
+        }}
+        date={date}
+        dateLabel={day.label}
+        time={time}
+        occupied={occupied}
+      />
     </PageShell>
   );
 }

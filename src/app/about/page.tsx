@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import AboutSections from "@/components/AboutSections";
-import AppChrome from "@/components/AppChrome";
 import PageShell from "@/components/PageShell";
 
 export const metadata: Metadata = {
@@ -12,9 +11,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <PageShell>
-      <AppChrome>
-        <AboutSections />
-      </AppChrome>
+      <AboutSections />
     </PageShell>
   );
 }

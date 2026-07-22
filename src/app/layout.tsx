@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Big_Shoulders, Sora } from "next/font/google";
+import AppChrome from "@/components/AppChrome";
 import "./globals.css";
 
 const bigShoulders = Big_Shoulders({
@@ -32,7 +33,9 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`${bigShoulders.variable} ${sora.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <AppChrome>{children}</AppChrome>
+      </body>
     </html>
   );
 }
