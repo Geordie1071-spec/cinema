@@ -1,0 +1,26 @@
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 40px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: rgba(243, 241, 236, 0.55);
+}
+
+.websiteBy {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f3f1ec;
+  transition: color 0.25s ease;
+}
+
+.websiteBy:hover {
+  color: #fa315c;
+}

@@ -1,0 +1,234 @@
+.bgLayer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 22%;
+  background-color: #0a0a0b;
+}
+
+.bgIncoming {
+  transition: clip-path 0.82s cubic-bezier(0.76, 0, 0.24, 1);
+  clip-path: circle(0% at 50% 50%);
+}
+
+.bgIncomingRevealing {
+  clip-path: circle(78% at 50% 50%);
+}
+
+.gradientH {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(8, 8, 10, 0.92) 0%,
+    rgba(8, 8, 10, 0.55) 42%,
+    rgba(8, 8, 10, 0.15) 100%
+  );
+}
+
+.gradientV {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    rgba(8, 8, 10, 0.96) 0%,
+    rgba(8, 8, 10, 0.25) 34%,
+    rgba(8, 8, 10, 0) 60%
+  );
+}
+
+.main {
+  position: absolute;
+  left: 40px;
+  top: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 660px;
+  transform: translateY(-6%);
+  pointer-events: none;
+}
+
+.heroLogo {
+  width: 560px;
+  height: 150px;
+  background-size: contain;
+  background-position: left center;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 4px 30px rgba(0, 0, 0, 0.6));
+}
+
+.heroTitle {
+  font-family: var(--font-big-shoulders), sans-serif;
+  font-size: 88px;
+  line-height: 0.92;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  text-shadow: 0 2px 40px rgba(0, 0, 0, 0.6);
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 26px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #cfcbc2;
+}
+
+.metaDot {
+  opacity: 0.5;
+}
+
+.ratingRing {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ratingRingInner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #0c0d0f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #f3f1ec;
+}
+
+.buyTickets {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 32px;
+  width: fit-content;
+  font-size: 17px;
+  font-weight: 600;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid rgba(243, 241, 236, 0.35);
+  transition: color 0.25s, border-color 0.25s;
+}
+
+.buyTickets:hover {
+  color: #fa315c;
+  border-color: #fa315c;
+}
+
+.buyArrow {
+  display: inline-block;
+  font-size: 15px;
+}
+
+.buyTickets:hover .buyArrow {
+  animation: arrowShoot 0.55s cubic-bezier(0.6, 0, 0.2, 1);
+}
+
+.carouselSection {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 58px;
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+.stripWrap {
+  width: 100%;
+  overflow: visible;
+}
+
+.strip {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding: 24px 40px;
+  transition: opacity 0.34s ease;
+  opacity: 1;
+}
+
+.stripSwitching {
+  opacity: 0;
+}
+
+.card {
+  flex: 0 0 auto;
+  width: 150px;
+  height: 222px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: #16161a;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease;
+  opacity: 0.55;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border: none;
+  padding: 0;
+  display: block;
+  font: inherit;
+}
+
+.cardActive {
+  transform: translateY(-8px) scale(1.02);
+  opacity: 1;
+  box-shadow: 0 0 0 2px #f3f1ec, 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+.tabs {
+  display: flex;
+  gap: 34px;
+}
+
+.tab {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sora), sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  padding: 0 0 8px;
+  transition: color 0.2s;
+  color: rgba(243, 241, 236, 0.45);
+  border-bottom: 2px solid transparent;
+}
+
+.tabActive {
+  color: #f3f1ec;
+  border-bottom: 2px solid #fa315c;
+}
+
+@keyframes arrowShoot {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(18px, -18px);
+    opacity: 0;
+  }
+  41% {
+    transform: translate(-18px, 18px);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}

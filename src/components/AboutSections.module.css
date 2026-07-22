@@ -1,0 +1,105 @@
+.scroller {
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+
+.section {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 120px 8vw 150px;
+  scroll-snap-align: start;
+}
+
+.sectionInner {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.kickerRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-sora), sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #fa315c;
+  margin-bottom: 26px;
+}
+
+.kickerLine {
+  width: 34px;
+  height: 1px;
+  background: #fa315c;
+  opacity: 0.6;
+}
+
+.heading {
+  font-family: var(--font-big-shoulders), sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(46px, 7vw, 104px);
+  line-height: 0.94;
+  letter-spacing: 0.01em;
+  margin-bottom: 32px;
+  text-wrap: balance;
+}
+
+.body {
+  font-family: var(--font-sora), sans-serif;
+  font-weight: 300;
+  font-size: clamp(18px, 1.45vw, 24px);
+  line-height: 1.72;
+  color: #cfcbc2;
+  max-width: 780px;
+}
+
+.word {
+  display: inline-block;
+  margin-right: 0.28em;
+  opacity: var(--rv, 0);
+  filter: blur(calc((1 - var(--rv, 0)) * 9px));
+  transform: translateY(calc((1 - var(--rv, 0)) * 28px));
+  transition: opacity 0.7s ease, filter 0.75s ease,
+    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.progress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 64px;
+  z-index: 30;
+  display: flex;
+  gap: 9px;
+  justify-content: center;
+  padding: 0 40px;
+  pointer-events: none;
+}
+
+.progressBar {
+  width: 56px;
+  height: 3px;
+  background: rgba(243, 241, 236, 0.18);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  pointer-events: auto;
+  border: none;
+  padding: 0;
+  display: block;
+}
+
+.progressFill {
+  height: 100%;
+  width: 100%;
+  background: #fa315c;
+  transform-origin: left;
+  transition: transform 0.18s linear;
+}

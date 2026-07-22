@@ -1,0 +1,55 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(8, 8, 10, 0.97);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.overlayOpen {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.closeButton {
+  position: absolute;
+  top: 28px;
+  right: 44px;
+  background: none;
+  border: none;
+  color: #f3f1ec;
+  font-size: 34px;
+  font-weight: 300;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  padding-left: 9vw;
+}
+
+.navLink {
+  font-family: var(--font-big-shoulders), sans-serif;
+  font-size: 96px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: #f3f1ec;
+  transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
+}
+
+.navLink:hover {
+  transform: translateX(-16px);
+  color: #fa315c;
+}

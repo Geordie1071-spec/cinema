@@ -1,0 +1,10 @@
+.link {
+  display: flex;
+  align-items: center;
+  color: #f3f1ec;
+  transition: color 0.25s ease;
+}
+
+.link:hover {
+  color: #fa315c;
+}
