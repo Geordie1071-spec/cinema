@@ -62,6 +62,11 @@
   max-width: 780px;
 }
 
+.cta {
+  margin-top: 36px;
+  pointer-events: auto;
+}
+
 .word {
   display: inline-block;
   margin-right: 0.28em;
@@ -130,6 +135,10 @@
   .body {
     font-size: clamp(15px, 3.8vw, 18px);
     line-height: 1.65;
+  }
+
+  .cta {
+    margin-top: 28px;
   }
 
   .progress {

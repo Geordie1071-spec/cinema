@@ -1,0 +1,44 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 26px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #cfcbc2;
+}
+
+.dot {
+  opacity: 0.5;
+}
+
+.genresMobile {
+  display: none;
+}
+
+.desktopOnly {
+  display: inline;
+}
+
+@media (max-width: 768px) {
+  .row {
+    gap: 12px;
+    margin-top: 18px;
+    font-size: 14px;
+    flex-wrap: wrap;
+  }
+
+  .desktopOnly {
+    display: none;
+  }
+
+  .genresMobile {
+    display: block;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #cfcbc2;
+    line-height: 1.4;
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,153 @@
+.main {
+  position: relative;
+  z-index: 10;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 120px 8vw 110px;
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 15% 20%,
+      rgba(250, 49, 92, 0.12),
+      transparent 55%
+    ),
+    linear-gradient(
+      160deg,
+      #0a0a0b 0%,
+      #12131a 48%,
+      #0a0a0b 100%
+    );
+}
+
+.inner {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.kickerRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-sora), sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #fa315c;
+  margin-bottom: 26px;
+}
+
+.kickerLine {
+  width: 34px;
+  height: 1px;
+  background: #fa315c;
+  opacity: 0.6;
+}
+
+.heading {
+  font-family: var(--font-big-shoulders), sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(52px, 8vw, 104px);
+  line-height: 0.94;
+  letter-spacing: 0.01em;
+  margin-bottom: 24px;
+}
+
+.intro {
+  font-family: var(--font-sora), sans-serif;
+  font-weight: 300;
+  font-size: clamp(16px, 1.4vw, 22px);
+  line-height: 1.7;
+  color: #cfcbc2;
+  max-width: 720px;
+  margin-bottom: 48px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 36px 40px;
+  margin-bottom: 48px;
+}
+
+.blockLabel {
+  font-family: var(--font-sora), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #fa315c;
+  margin-bottom: 14px;
+}
+
+.lines {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: #e9e6df;
+}
+
+.external {
+  color: inherit;
+  border-bottom: 1px solid rgba(243, 241, 236, 0.28);
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.external:hover {
+  color: #fa315c;
+  border-color: #fa315c;
+}
+
+.cta {
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    align-items: flex-start;
+    padding: 110px 6vw 120px;
+    overflow-y: auto;
+  }
+
+  .kickerRow {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .kickerLine {
+    width: 24px;
+  }
+
+  .heading {
+    font-size: clamp(40px, 11vw, 64px);
+    margin-bottom: 16px;
+  }
+
+  .intro {
+    font-size: 15px;
+    margin-bottom: 32px;
+  }
+
+  .lines {
+    font-size: 15px;
+  }
+
+  .cta {
+    margin-top: 4px;
+    margin-bottom: 24px;
+  }
+}

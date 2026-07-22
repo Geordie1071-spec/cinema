@@ -1,0 +1,52 @@
+.card {
+  flex: 0 0 auto;
+  width: 150px;
+  height: 222px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: #16161a;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, opacity 0.22s ease;
+  opacity: 0.55;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border: none;
+  padding: 0;
+  display: block;
+  font: inherit;
+}
+
+.active {
+  transform: translateY(-8px) scale(1.02);
+  opacity: 1;
+  box-shadow: 0 0 0 2px #f3f1ec, 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 1024px) {
+  .card {
+    width: 120px;
+    height: 178px;
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    width: 100px;
+    height: 148px;
+    border-radius: 8px;
+    scroll-snap-align: center;
+  }
+
+  .active {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 0 0 1.5px #f3f1ec, 0 10px 24px rgba(0, 0, 0, 0.55);
+  }
+}
+
+@media (max-width: 400px) {
+  .card {
+    width: 88px;
+    height: 130px;
+  }
+}

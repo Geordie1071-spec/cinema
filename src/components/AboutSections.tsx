@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ABOUT_SECTIONS } from "@/lib/about-sections";
+import BuyTicketsLink from "./BuyTicketsLink";
 import styles from "./AboutSections.module.css";
 
 type SectionVarStyle = CSSProperties & { "--rv"?: number };
@@ -73,6 +74,8 @@ export default function AboutSections() {
     [scrollTop, effectiveVh]
   );
 
+  const lastIndex = SECTION_DATA.length - 1;
+
   return (
     <>
       <div
@@ -106,6 +109,9 @@ export default function AboutSections() {
                   </span>
                 ))}
               </p>
+              {i === lastIndex ? (
+                <BuyTicketsLink className={styles.cta} />
+              ) : null}
             </div>
           </section>
         ))}

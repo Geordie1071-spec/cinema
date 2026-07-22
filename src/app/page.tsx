@@ -1,13 +1,29 @@
 import AppChrome from "@/components/AppChrome";
 import HomeHero from "@/components/HomeHero";
-import styles from "./page.module.css";
+import PageShell from "@/components/PageShell";
+import { getGenreMap, getMovieExtras, getNowPlaying, getUpcoming } from "@/lib/movies";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [genreMap, nowPlaying, upcoming] = await Promise.all([
+    getGenreMap(),
+    getNowPlaying(),
+    getUpcoming(),
+  ]);
+
+  const initialExtras = nowPlaying[0]
+    ? await getMovieExtras(nowPlaying[0].id)
+    : null;
+
   return (
-    <div className={styles.page}>
+    <PageShell>
       <AppChrome>
-        <HomeHero />
+        <HomeHero
+          nowPlaying={nowPlaying}
+          upcoming={upcoming}
+          genreMap={genreMap}
+          initialExtras={initialExtras}
+        />
       </AppChrome>
-    </div>
+    </PageShell>
   );
 }

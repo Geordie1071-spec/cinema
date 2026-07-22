@@ -1,0 +1,71 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 22%;
+  background-color: #0a0a0b;
+}
+
+.incoming {
+  opacity: 0;
+  transition: opacity 0.32s ease-out;
+  will-change: opacity;
+  pointer-events: none;
+}
+
+.reset {
+  transition: none;
+  opacity: 0;
+}
+
+.revealing {
+  opacity: 1;
+}
+
+.gradientH {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(8, 8, 10, 0.92) 0%,
+    rgba(8, 8, 10, 0.55) 42%,
+    rgba(8, 8, 10, 0.15) 100%
+  );
+}
+
+.gradientV {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    rgba(8, 8, 10, 0.96) 0%,
+    rgba(8, 8, 10, 0.25) 34%,
+    rgba(8, 8, 10, 0) 60%
+  );
+}
+
+@media (max-width: 768px) {
+  .layer {
+    background-position: center 18%;
+  }
+
+  .gradientH {
+    background: linear-gradient(
+      180deg,
+      rgba(8, 8, 10, 0.72) 0%,
+      rgba(8, 8, 10, 0.28) 38%,
+      rgba(8, 8, 10, 0.55) 62%,
+      rgba(8, 8, 10, 0.96) 100%
+    );
+  }
+
+  .gradientV {
+    background: linear-gradient(
+      0deg,
+      rgba(8, 8, 10, 0.98) 0%,
+      rgba(8, 8, 10, 0.55) 28%,
+      rgba(8, 8, 10, 0.12) 52%,
+      rgba(8, 8, 10, 0.35) 100%
+    );
+  }
+}

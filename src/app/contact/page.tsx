@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
-import AboutSections from "@/components/AboutSections";
 import AppChrome from "@/components/AppChrome";
+import ContactContent from "@/components/ContactContent";
 import PageShell from "@/components/PageShell";
 
 export const metadata: Metadata = {
-  title: "About Us — Citadel Cinema",
+  title: "Contact Us — Citadel Cinema",
   description:
-    "Gozo's home of cinema — in the heart of Victoria, a few metres from Independence Square.",
+    "Get in touch with Citadel Cinema in Victoria, Gozo — screenings, accessibility, and more.",
 };
 
-export default function AboutPage() {
+export default function ContactPage() {
   return (
     <PageShell>
       <AppChrome>
-        <AboutSections />
+        <ContactContent />
       </AppChrome>
     </PageShell>
   );
