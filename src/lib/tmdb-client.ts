@@ -39,12 +39,12 @@ export async function fetchNowPlaying(): Promise<Movie[]> {
   const data = await getJson<{ results: Movie[] }>(
     "/api/tmdb/movies/now-playing"
   );
-  return cleanMovies(data.results, 4);
+  return cleanMovies(data.results);
 }
 
 export async function fetchUpcoming(): Promise<Movie[]> {
   const data = await getJson<{ results: Movie[] }>(
     "/api/tmdb/movies/upcoming"
   );
-  return cleanMovies(data.results, 6);
+  return cleanMovies(data.results);
 }
