@@ -1,3 +1,4 @@
+import { NOW_PLAYING_IDS, UPCOMING_IDS } from "./catalogue";
 import type {
   ExtrasMap,
   GenreMap,
@@ -11,11 +12,41 @@ import { tmdbFetch } from "./tmdb-server";
 
 export function cleanMovies(
   list: Movie[] | undefined,
-  limit: number
+  limit?: number
 ): Movie[] {
-  return (list || [])
-    .filter((m) => m.backdrop_path && m.poster_path)
-    .slice(0, limit);
+  const cleaned = (list || []).filter((m) => m.backdrop_path && m.poster_path);
+  return limit == null ? cleaned : cleaned.slice(0, limit);
+}
+
+function toMovie(data: Record<string, unknown>): Movie {
+  const genres = (data.genres as { id: number }[] | undefined) || [];
+  return {
+    id: data.id as number,
+    title: (data.title as string) || "",
+    overview: (data.overview as string) || "",
+    backdrop_path: (data.backdrop_path as string | null) ?? null,
+    poster_path: (data.poster_path as string | null) ?? null,
+    genre_ids:
+      (data.genre_ids as number[] | undefined) ||
+      genres.map((g) => g.id),
+    vote_average: (data.vote_average as number) ?? 0,
+    release_date: (data.release_date as string) || "",
+  };
+}
+
+export async function getMoviesByIds(ids: readonly number[]): Promise<Movie[]> {
+  const results = await Promise.all(
+    ids.map(async (id) => {
+      try {
+        const data = await tmdbFetch(`/movie/${id}?language=en-US`);
+        return toMovie(data);
+      } catch (err) {
+        console.error(`Failed to load movie ${id}`, err);
+        return null;
+      }
+    })
+  );
+  return cleanMovies(results.filter((m): m is Movie => m != null));
 }
 
 export function pickLogoUrl(images: MovieImages): string | null {
@@ -56,13 +87,11 @@ export async function getGenreMap(): Promise<GenreMap> {
 }
 
 export async function getNowPlaying(): Promise<Movie[]> {
-  const data = await tmdbFetch("/movie/now_playing?language=en-US&page=1");
-  return cleanMovies(data.results, 4);
+  return getMoviesByIds(NOW_PLAYING_IDS);
 }
 
 export async function getUpcoming(): Promise<Movie[]> {
-  const data = await tmdbFetch("/movie/upcoming?language=en-US&page=1");
-  return cleanMovies(data.results, 6);
+  return getMoviesByIds(UPCOMING_IDS);
 }
 
 export async function getMovieDetail(id: number): Promise<MovieDetail> {

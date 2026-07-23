@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { tmdbFetch } from "@/lib/tmdb-server";
+import { getNowPlaying } from "@/lib/movies";
 
 export async function GET() {
   try {
-    const data = await tmdbFetch("/movie/now_playing?language=en-US&page=1");
-    return NextResponse.json(data);
+    const results = await getNowPlaying();
+    return NextResponse.json({ results });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "TMDB request failed" },
